@@ -212,6 +212,11 @@ arsort($cargoCount);
                         value="<?= htmlspecialchars($termoBusca) ?>" autocomplete="off">
                     <button type="submit" class="btn-search">Buscar</button>
                 </div>
+                <div id="linksAi">
+                    <a href="assistente_voz.html" class="btn btn-outline btn-sm" title="Assistente de Voz">
+                        <i class="bi bi-mic"></i> Assistente de Virtual
+                    </a>
+                </div>
             </form>
 
             <div class="header-actions">

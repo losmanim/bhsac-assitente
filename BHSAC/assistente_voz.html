@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente Virtual - Funcionários | BHSAC</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --primary-dark: #d97706;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a202c 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container-assistente {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-assistente {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-assistente h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .header-assistente p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .voice-interface {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .voice-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
+        }
+
+        .voice-button.listening {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(145deg, var(--danger), #dc2626);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .status-indicator {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .status-indicator.listening {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .status-indicator.processing {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .chat-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .message.user {
+            background: rgba(245, 158, 11, 0.2);
+            border-left: 4px solid var(--primary);
+            margin-left: 20%;
+        }
+
+        .message.assistant {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 4px solid var(--success);
+            margin-right: 20%;
+        }
+
+        .message-content {
+            margin-bottom: 5px;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .text-input-container {
+            margin-top: 20px;
+        }
+
+        .text-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .send-button {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .commands-help {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .commands-help h5 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .command-example {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        /* Botão Flutuante de Acesso Rápido */
+        .floating-quick-access {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .quick-access-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-access-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        }
+
+        .quick-menu {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 280px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .quick-menu.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .quick-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .quick-menu-header h6 {
+            margin: 0;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-menu:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .quick-commands {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quick-command-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .quick-command-btn:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: var(--primary);
+            transform: translateX(-5px);
+        }
+
+        .quick-command-btn i {
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        /* Dialogs */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .dialog-overlay.active {
+            display: flex;
+        }
+
+        .dialog {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: dialogSlideIn 0.3s ease;
+        }
+
+        @keyframes dialogSlideIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.9); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .dialog-header h5 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .dialog-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .dialog-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .dialog-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .dialog-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .dialog-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dialog-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dialog-btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .dialog-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .dialog-btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-assistente">
+        <div class="header-assistente">
+            <h1><i class="bi bi-mic-fill"></i> Assistente Virtual</h1>
+            <p>Gestão de Funcionários por Comandos de Voz</p>
+        </div>
+
+        <div class="voice-interface">
+            <div class="text-center">
+                <button id="voiceButton" class="voice-button">
+                    <i class="bi bi-mic"></i>
+                </button>
+                
+                <div id="statusIndicator" class="status-indicator">
+                    Clique no microfone para falar
+                </div>
+            </div>
+
+            <!-- Botão Flutuante de Acesso Rápido -->
+            <div class="floating-quick-access">
+                <button id="quickAccessBtn" class="quick-access-btn" onclick="toggleQuickMenu()">
+                    <i class="bi bi-chat-dots"></i>
+                </button>
+                
+                <div id="quickMenu" class="quick-menu">
+                    <div class="quick-menu-header">
+                        <h6><i class="bi bi-lightning"></i> Ações Rápidas</h6>
+                        <button class="close-menu" onclick="toggleQuickMenu()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                    <div class="quick-commands">
+                        <button class="quick-command-btn" onclick="executeQuickCommand('Quantos funcionários temos?')">
+                            <i class="bi bi-people"></i>
+                            <span>Listar Todos</span>
+                        </button>
+                        <button class="quick-command-btn" onclick="executeQuickCommand('Quantos pedreiros temos?')">
+                            <i class="bi bi-hammer"></i>
+                            <span>Pedreiros</span>
+                        </button>
+                        <button class="quick-command-btn" onclick="executeQuickCommand('Quantos ajudantes temos?')">
+                            <i class="bi bi-person-arms-up"></i>
+                            <span>Ajudantes</span>
+                        </button>
+                        <button class="quick-command-btn" onclick="executeQuickCommand('Quantos motoristas temos?')">
+                            <i class="bi bi-truck"></i>
+                            <span>Motoristas</span>
+                        </button>
+                        <button class="quick-command-btn" onclick="showSearchDialog()">
+                            <i class="bi bi-search"></i>
+                            <span>Buscar Funcionário</span>
+                        </button>
+                        <button class="quick-command-btn" onclick="showNewEmployeeDialog()">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Novo Funcionário</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-input-container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <input type="text" id="textInput" class="text-input" 
+                               placeholder="Ou digite seu comando aqui..." 
+                               onkeypress="if(event.key === 'Enter') sendTextCommand()">
+                    </div>
+                    <div class="col-md-3">
+                        <button id="sendButton" class="send-button w-100" onclick="sendTextCommand()">
+                            <i class="bi bi-send"></i> Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Processando...</span>
+                </div>
+                <p class="mt-2">Processando comando...</p>
+            </div>
+
+            <div class="chat-container" id="chatContainer">
+                <div class="message assistant">
+                    <div class="message-content">
+                        👋 Olá! Sou o assistente virtual do BHSAC. Posso ajudar você a gerenciar funcionários usando comandos de voz.
+                    </div>
+                    <div class="message-time">Sistema</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="commands-help">
+            <h5><i class="bi bi-question-circle"></i> Comandos Disponíveis:</h5>
+            <div class="command-example">"Quantos funcionários temos?"</div>
+            <div class="command-example">"Buscar funcionário João"</div>
+            <div class="command-example">"Telefone do funcionário Maria"</div>
+            <div class="command-example">"Quantos pedreiros temos?"</div>
+            <div class="command-example">"Cadastrar novo funcionário Pedro"</div>
+        </div>
+    </div>
+
+    <!-- Dialogs -->
+    <div id="searchDialog" class="dialog-overlay">
+        <div class="dialog">
+            <div class="dialog-header">
+                <h5><i class="bi bi-search"></i> Buscar Funcionário</h5>
+                <button class="dialog-close" onclick="closeDialog('searchDialog')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <input type="text" id="searchInput" class="dialog-input" 
+                   placeholder="Digite o nome do funcionário..." 
+                   onkeypress="if(event.key === 'Enter') executeSearch()">
+            <div class="dialog-buttons">
+                <button class="dialog-btn dialog-btn-secondary" onclick="closeDialog('searchDialog')">Cancelar</button>
+                <button class="dialog-btn dialog-btn-primary" onclick="executeSearch()">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="newEmployeeDialog" class="dialog-overlay">
+        <div class="dialog">
+            <div class="dialog-header">
+                <h5><i class="bi bi-person-plus"></i> Novo Funcionário</h5>
+                <button class="dialog-close" onclick="closeDialog('newEmployeeDialog')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <input type="text" id="newEmployeeName" class="dialog-input" 
+                   placeholder="Nome do funcionário..." 
+                   onkeypress="if(event.key === 'Enter') executeNewEmployee()">
+            <div class="dialog-buttons">
+                <button class="dialog-btn dialog-btn-secondary" onclick="closeDialog('newEmployeeDialog')">Cancelar</button>
+                <button class="dialog-btn dialog-btn-primary" onclick="executeNewEmployee()">Cadastrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variáveis globais
+        let recognition = null;
+        let isListening = false;
+
+        // Inicializar reconhecimento de voz
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                isListening = true;
+                updateUI('listening');
+                document.getElementById('statusIndicator').textContent = '🎤 Ouvindo...';
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('textInput').value = transcript;
+                sendCommand(transcript);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Erro no reconhecimento:', event.error);
+                updateUI('error');
+                document.getElementById('statusIndicator').textContent = '❌ Erro: ' + event.error;
+                addMessage('assistant', 'Desculpe, ocorreu um erro ao reconhecer sua voz. Tente novamente.');
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                updateUI('idle');
+                document.getElementById('statusIndicator').textContent = 'Clique no microfone para falar';
+            };
+        } else {
+            document.getElementById('statusIndicator').textContent = '❌ Seu navegador não suporta reconhecimento de voz';
+        }
+
+        // Event Listeners
+        document.getElementById('voiceButton').addEventListener('click', toggleVoiceRecognition);
+        document.getElementById('sendButton').addEventListener('click', sendTextCommand);
+
+        function toggleVoiceRecognition() {
+            if (!recognition) {
+                alert('Seu navegador não suporta reconhecimento de voz');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        function sendTextCommand() {
+            const input = document.getElementById('textInput');
+            const command = input.value.trim();
+            
+            if (command) {
+                sendCommand(command);
+                input.value = '';
+            }
+        }
+
+        function sendCommand(command) {
+            addMessage('user', command);
+            updateUI('processing');
+            
+            // Enviar para API
+            fetch('api/assistente_funcionarios.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ comando: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateUI('idle');
+                
+                if (data.sucesso) {
+                    addMessage('assistant', data.mensagem);
+                    
+                    // Se houver dados adicionais, mostrar formatados
+                    if (data.dados) {
+                        formatAndDisplayData(data.acao_executada, data.dados);
+                    }
+                } else {
+                    addMessage('assistant', data.mensagem);
+                }
+            })
+            .catch(error => {
+                updateUI('error');
+                console.error('Erro:', error);
+                addMessage('assistant', 'Desculpe, ocorreu um erro ao processar seu comando. Tente novamente.');
+            });
+        }
+
+        function addMessage(type, content) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const time = new Date().toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${content}</div>
+                <div class="message-time">${type === 'user' ? 'Você' : 'Assistente'} • ${time}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function formatAndDisplayData(acao, dados) {
+            let formattedContent = '';
+            
+            switch(acao) {
+                case 'listar_funcionarios':
+                    if (dados.funcionarios && dados.funcionarios.length > 0) {
+                        formattedContent = '<strong>Funcionários encontrados:</strong><br>';
+                        dados.funcionarios.forEach(func => {
+                            formattedContent += `• ${func.nome} - ${func.cargo}<br>`;
+                        });
+                    }
+                    break;
+                    
+                case 'buscar_funcionario':
+                    if (dados) {
+                        formattedContent = `
+                            <strong>Dados do funcionário:</strong><br>
+                            📋 Nome: ${dados.nome}<br>
+                            👔 Cargo: ${dados.cargo}<br>
+                            📱 Telefone: ${dados.telefone}<br>
+                            📧 Email: ${dados.email || 'Não informado'}<br>
+                            📅 Contratação: ${dados.data_contratacao || 'Não informada'}
+                        `;
+                    }
+                    break;
+                    
+                case 'funcionarios_por_cargo':
+                    if (dados.funcionarios && dados.funcionarios.length > 0) {
+                        formattedContent = `<strong>${dados.cargo}s (${dados.total}):</strong><br>`;
+                        dados.funcionarios.forEach(func => {
+                            formattedContent += `• ${func.nome} - ${func.telefone}<br>`;
+                        });
+                    }
+                    break;
+            }
+            
+            if (formattedContent) {
+                addMessage('assistant', formattedContent);
+            }
+        }
+
+        function updateUI(state) {
+            const button = document.getElementById('voiceButton');
+            const status = document.getElementById('statusIndicator');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            // Reset classes
+            button.classList.remove('listening');
+            status.classList.remove('listening', 'processing');
+            spinner.classList.remove('active');
+            
+            switch(state) {
+                case 'listening':
+                    button.classList.add('listening');
+                    status.classList.add('listening');
+                    button.innerHTML = '<i class="bi bi-mic-mute"></i>';
+                    break;
+                    
+                case 'processing':
+                    status.classList.add('processing');
+                    status.textContent = '⚙️ Processando...';
+                    spinner.classList.add('active');
+                    break;
+                    
+                case 'error':
+                    button.innerHTML = '<i class="bi bi-mic"></i>';
+                    break;
+                    
+                case 'idle':
+                default:
+                    button.innerHTML = '<i class="bi bi-mic"></i>';
+                    break;
+            }
+        }
+
+        // Funções do Menu Rápido
+        function toggleQuickMenu() {
+            const menu = document.getElementById('quickMenu');
+            menu.classList.toggle('active');
+        }
+
+        function executeQuickCommand(command) {
+            toggleQuickMenu();
+            sendCommand(command);
+        }
+
+        function showSearchDialog() {
+            toggleQuickMenu();
+            document.getElementById('searchDialog').classList.add('active');
+            document.getElementById('searchInput').focus();
+        }
+
+        function showNewEmployeeDialog() {
+            toggleQuickMenu();
+            document.getElementById('newEmployeeDialog').classList.add('active');
+            document.getElementById('newEmployeeName').focus();
+        }
+
+        function closeDialog(dialogId) {
+            document.getElementById(dialogId).classList.remove('active');
+            // Limpar inputs
+            if (dialogId === 'searchDialog') {
+                document.getElementById('searchInput').value = '';
+            } else if (dialogId === 'newEmployeeDialog') {
+                document.getElementById('newEmployeeName').value = '';
+            }
+        }
+
+        function executeSearch() {
+            const searchValue = document.getElementById('searchInput').value.trim();
+            if (searchValue) {
+                closeDialog('searchDialog');
+                sendCommand(`Buscar funcionário ${searchValue}`);
+            }
+        }
+
+        function executeNewEmployee() {
+            const employeeName = document.getElementById('newEmployeeName').value.trim();
+            if (employeeName) {
+                closeDialog('newEmployeeDialog');
+                sendCommand(`Cadastrar novo funcionário ${employeeName}`);
+            }
+        }
+
+        // Fechar menus ao clicar fora
+        document.addEventListener('click', function(event) {
+            const quickAccess = document.querySelector('.floating-quick-access');
+            const quickMenu = document.getElementById('quickMenu');
+            
+            if (!quickAccess.contains(event.target) && quickMenu.classList.contains('active')) {
+                quickMenu.classList.remove('active');
+            }
+        });
+
+        // Fechar dialogs ao clicar no overlay
+        document.querySelectorAll('.dialog-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(event) {
+                if (event.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
